@@ -15,6 +15,8 @@ interface DashboardFiltersProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   onClearSearch: () => void
+  onClearAll: () => void
+  hasActiveFilters: boolean
 }
 
 export function DashboardFilters({
@@ -30,6 +32,8 @@ export function DashboardFilters({
   searchQuery,
   onSearchChange,
   onClearSearch,
+  onClearAll,
+  hasActiveFilters,
 }: DashboardFiltersProps) {
   return (
     <div className='space-y-4'>
@@ -93,6 +97,15 @@ export function DashboardFilters({
             </option>
           ))}
         </select>
+
+        {hasActiveFilters && (
+          <button
+            onClick={onClearAll}
+            className='px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg text-sm font-medium transition-colors md:ml-auto whitespace-nowrap'
+          >
+            Clear All Filters
+          </button>
+        )}
       </div>
     </div>
   )

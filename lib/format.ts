@@ -12,6 +12,7 @@ export function formatNumber(value: number): string {
 }
 
 export function formatDate(dateString: string): string {
+  if (!dateString || dateString === 'null') return '-'
   try {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat('id-ID', {
@@ -20,7 +21,7 @@ export function formatDate(dateString: string): string {
       day: 'numeric',
     }).format(date)
   } catch {
-    return dateString
+    return dateString || '-'
   }
 }
 

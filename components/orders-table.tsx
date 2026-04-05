@@ -1,6 +1,6 @@
 'use client'
 
-import { MouseEvent, useState } from 'react'
+import { MouseEvent, useState, useEffect } from 'react'
 import {
   ChevronUp,
   ChevronDown,
@@ -14,6 +14,7 @@ import { Order } from '@/lib/csv-parser'
 import { formatCurrency, formatDate } from '@/lib/format'
 import { paginate } from '@/lib/utils'
 import { OrderDetailsModal } from './order-details-modal'
+import { toast } from 'sonner'
 
 const getStatusStyles = (status: string) => {
   if (!status)
@@ -60,6 +61,11 @@ export function OrdersTable({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
+  // Reset to page 1 whenever the filtered orders change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [orders])
+
   const pagination = paginate(orders, currentPage, pageSize)
 
   const handleViewDetails = (order: Order) => {
@@ -71,6 +77,7 @@ export function OrdersTable({
     e.stopPropagation()
     navigator.clipboard.writeText(text)
     setOpenMenuId(null)
+    toast.success('Copied to clipboard')
   }
 
   const toggleMenu = (e: MouseEvent<HTMLButtonElement>, order_id: string) => {
@@ -123,10 +130,16 @@ export function OrdersTable({
                 Buyer ID {getSortIcon('buyer_user_id')}
               </th>
               <th
-                className='px-6 py-4 text-left font-semibold text-foreground cursor-pointer hover:bg-secondary/70'
+                className='px-2 py-4 text-left font-semibold text-foreground cursor-pointer hover:bg-secondary/70'
                 onClick={() => onSort('create_time')}
               >
-                Date {getSortIcon('create_time')}
+                Created Date {getSortIcon('create_time')}
+              </th>
+              <th
+                className='px-6 py-4 text-center font-semibold text-foreground cursor-pointer hover:bg-secondary/70'
+                onClick={() => onSort('item_count')}
+              >
+                Items {getSortIcon('item_count')}
               </th>
               <th
                 className='px-6 py-4 text-left font-semibold text-foreground cursor-pointer hover:bg-secondary/70'
@@ -149,7 +162,7 @@ export function OrdersTable({
             {pagination.total === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   className='px-6 py-8 text-center text-muted-foreground'
                 >
                   No orders found
@@ -165,14 +178,37 @@ export function OrdersTable({
                     {(pagination.page - 1) * pagination.pageSize + index + 1}
                   </td>
                   <td className='px-6 py-4 text-foreground font-medium'>
-                    {order.order_id}
+                    <div className='flex items-center gap-2 group'>
+                      {order.order_id}
+                      <button
+                        onClick={(e) => handleCopy(e, order.order_id)}
+                        className='p-1 text-muted-foreground hover:text-foreground transition-all'
+                        title='Copy Order ID'
+                      >
+                        <Copy className='w-3.5 h-3.5' />
+                      </button>
+                    </div>
                   </td>
                   <td className='px-6 py-4 text-foreground'>{order.channel}</td>
                   <td className='px-6 py-4 text-muted-foreground text-xs'>
-                    {order.buyer_user_id}
+                    <div className='flex items-center gap-2 group'>
+                      {order.buyer_user_id}
+                      <button
+                        onClick={(e) =>
+                          handleCopy(e, String(order.buyer_user_id))
+                        }
+                        className='p-1 text-muted-foreground hover:text-foreground transition-all'
+                        title='Copy Buyer ID'
+                      >
+                        <Copy className='w-3.5 h-3.5' />
+                      </button>
+                    </div>
                   </td>
                   <td className='px-6 py-4 text-muted-foreground'>
                     {formatDate(order.create_time)}
+                  </td>
+                  <td className='px-6 py-4 text-foreground font-medium text-center'>
+                    {order.item_count || 0}
                   </td>
                   <td className='px-6 py-4 text-foreground font-semibold'>
                     {formatCurrency(order.net_amount)}
@@ -205,24 +241,16 @@ export function OrdersTable({
                         {openMenuId === order.order_id && (
                           <div className='absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-lg z-50 py-1 overflow-hidden flex flex-col text-left'>
                             <button
-                              onClick={(e) => handleCopy(e, order.order_id)}
-                              className='w-full px-4 py-2 text-sm text-foreground hover:bg-secondary/50 text-left inline-flex items-center gap-2 transition-colors'
-                            >
-                              <Copy className='w-3 h-3 text-muted-foreground' />{' '}
-                              Copy Order ID
-                            </button>
-                            <button
                               onClick={(e) =>
-                                handleCopy(e, String(order.buyer_user_id))
-                              }
-                              className='w-full px-4 py-2 text-sm text-foreground hover:bg-secondary/50 text-left inline-flex items-center gap-2 transition-colors'
-                            >
-                              <Copy className='w-3 h-3 text-muted-foreground' />{' '}
-                              Copy Buyer ID
-                            </button>
-                            <button
-                              onClick={(e) =>
-                                handleCopy(e, JSON.stringify(order, null, 2))
+                                handleCopy(
+                                  e,
+                                  Object.entries(order)
+                                    .map(
+                                      ([key, value]) =>
+                                        `${key.replaceAll('_', ' ')}: ${value}`,
+                                    )
+                                    .join(',\n'),
+                                )
                               }
                               className='w-full px-4 py-2 text-sm text-foreground hover:bg-secondary/50 text-left inline-flex items-center gap-2 transition-colors'
                             >

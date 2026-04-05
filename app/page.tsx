@@ -152,6 +152,13 @@ export default function Dashboard() {
     }
   }
 
+  const handleClearAllFilters = () => {
+    setSearchQuery('')
+    setSelectedChannel('')
+    setSelectedMonth('')
+    setSelectedStatus('')
+  }
+
   const appliedFilters = []
   if (searchQuery) appliedFilters.push(`Search: "${searchQuery}"`)
   if (selectedChannel) appliedFilters.push(`Channel: ${selectedChannel}`)
@@ -190,9 +197,17 @@ export default function Dashboard() {
               </h2>
             </div>
             {appliedFilters.length > 0 ? (
-              <span className='text-sm text-muted-foreground bg-secondary/50 px-2.5 py-0.5 rounded-full'>
-                Filters applied - {appliedFilters.join(', ')}
-              </span>
+              <div className='flex items-center gap-3'>
+                <span className='text-sm text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full hidden md:inline-block'>
+                  Filters applied: {appliedFilters.join(', ')}
+                </span>
+                <button
+                  onClick={handleClearAllFilters}
+                  className='text-sm font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors'
+                >
+                  Clear all
+                </button>
+              </div>
             ) : null}
           </div>
           <KPICards
@@ -265,6 +280,8 @@ export default function Dashboard() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onClearSearch={() => setSearchQuery('')}
+            onClearAll={handleClearAllFilters}
+            hasActiveFilters={appliedFilters.length > 0}
           />
         </div>
 
