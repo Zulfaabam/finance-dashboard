@@ -59,7 +59,7 @@ export function StatusChart({ data, isLoading }: StatusChartProps) {
                 style={{ backgroundColor: getStatusColor(entry.name) }}
               />
               <span className='text-sm font-medium text-foreground'>
-                {entry.name}
+                {entry.name.replaceAll('_', ' ')}
               </span>
             </div>
             <span className='text-sm text-muted-foreground font-medium'>

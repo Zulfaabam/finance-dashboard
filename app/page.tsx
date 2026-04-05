@@ -156,7 +156,8 @@ export default function Dashboard() {
   if (searchQuery) appliedFilters.push(`Search: "${searchQuery}"`)
   if (selectedChannel) appliedFilters.push(`Channel: ${selectedChannel}`)
   if (selectedMonth) appliedFilters.push(`Month: ${selectedMonth}`)
-  if (selectedStatus) appliedFilters.push(`Status: ${selectedStatus}`)
+  if (selectedStatus)
+    appliedFilters.push(`Status: ${selectedStatus.replaceAll('_', ' ')}`)
 
   return (
     <main className='min-h-screen bg-background'>

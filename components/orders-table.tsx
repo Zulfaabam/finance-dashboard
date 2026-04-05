@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { MouseEvent, useState } from 'react'
 import {
   ChevronUp,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Eye,
+  MoreVertical,
+  Copy,
 } from 'lucide-react'
 import { Order } from '@/lib/csv-parser'
 import { formatCurrency, formatDate } from '@/lib/format'
@@ -56,6 +58,7 @@ export function OrdersTable({
   const [pageSize, setPageSize] = useState(10)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   const pagination = paginate(orders, currentPage, pageSize)
 
@@ -63,6 +66,18 @@ export function OrdersTable({
     setSelectedOrder(order)
     setIsModalOpen(true)
   }
+
+  const handleCopy = (e: MouseEvent<HTMLButtonElement>, text: string) => {
+    e.stopPropagation()
+    navigator.clipboard.writeText(text)
+    setOpenMenuId(null)
+  }
+
+  const toggleMenu = (e: MouseEvent<HTMLButtonElement>, order_id: string) => {
+    e.stopPropagation()
+    setOpenMenuId(openMenuId === order_id ? null : order_id)
+  }
+
   if (isLoading) {
     return (
       <div className='bg-card border border-border rounded-lg p-6 h-96 flex items-center justify-center'>
@@ -166,18 +181,58 @@ export function OrdersTable({
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyles(order.order_status)}`}
                     >
-                      {order.order_status}
+                      {order.order_status.replaceAll('_', ' ')}
                     </span>
                   </td>
                   <td className='px-6 py-4 text-center'>
-                    <button
-                      onClick={() => handleViewDetails(order)}
-                      className='inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium'
-                      title='View order details'
-                    >
-                      <Eye className='w-4 h-4' />
-                      View
-                    </button>
+                    <div className='flex items-center justify-center gap-2'>
+                      <button
+                        onClick={() => handleViewDetails(order)}
+                        className='inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium'
+                        title='View order details'
+                      >
+                        <Eye className='w-4 h-4' />
+                        View
+                      </button>
+                      <div className='relative'>
+                        <button
+                          onClick={(e) => toggleMenu(e, order.order_id)}
+                          className='p-1.5 rounded-lg hover:bg-secondary/80 text-muted-foreground transition-colors'
+                          title='More actions'
+                        >
+                          <MoreVertical className='w-4 h-4' />
+                        </button>
+                        {openMenuId === order.order_id && (
+                          <div className='absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded-lg shadow-lg z-50 py-1 overflow-hidden flex flex-col text-left'>
+                            <button
+                              onClick={(e) => handleCopy(e, order.order_id)}
+                              className='w-full px-4 py-2 text-sm text-foreground hover:bg-secondary/50 text-left inline-flex items-center gap-2 transition-colors'
+                            >
+                              <Copy className='w-3 h-3 text-muted-foreground' />{' '}
+                              Copy Order ID
+                            </button>
+                            <button
+                              onClick={(e) =>
+                                handleCopy(e, String(order.buyer_user_id))
+                              }
+                              className='w-full px-4 py-2 text-sm text-foreground hover:bg-secondary/50 text-left inline-flex items-center gap-2 transition-colors'
+                            >
+                              <Copy className='w-3 h-3 text-muted-foreground' />{' '}
+                              Copy Buyer ID
+                            </button>
+                            <button
+                              onClick={(e) =>
+                                handleCopy(e, JSON.stringify(order, null, 2))
+                              }
+                              className='w-full px-4 py-2 text-sm text-foreground hover:bg-secondary/50 text-left inline-flex items-center gap-2 transition-colors'
+                            >
+                              <Copy className='w-3 h-3 text-muted-foreground' />{' '}
+                              Copy All Data
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ))
