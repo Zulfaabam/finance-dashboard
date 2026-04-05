@@ -29,7 +29,7 @@ A modern, responsive e-commerce finance dashboard built with Next.js and Tailwin
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Zulfaabam/finance-dashboard
    cd finance-dashboard
    ```
 
