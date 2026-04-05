@@ -26,6 +26,9 @@ export default function Dashboard() {
   const [selectedStatus, setSelectedStatus] = useState('')
   const [sortKey, setSortKey] = useState<string>('create_time')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [selectedDateColumn, setSelectedDateColumn] =
+    useState<string>('create_time')
+  const [selectedDate, setSelectedDate] = useState<string>('')
 
   // Load CSV data
   useEffect(() => {
@@ -78,6 +81,16 @@ export default function Dashboard() {
       )
     }
 
+    // Apply date filter
+    if (selectedDate && selectedDateColumn) {
+      filtered = filtered.filter((order) => {
+        const dateValue = (order as any)[selectedDateColumn]
+        if (!dateValue) return false
+        const orderDate = dateValue.split(' ')[0] // Format: YYYY-MM-DD
+        return orderDate === selectedDate
+      })
+    }
+
     // Sort
     filtered.sort((a, b) => {
       const aValue = (a as any)[sortKey] || ''
@@ -100,6 +113,8 @@ export default function Dashboard() {
     selectedChannel,
     selectedMonth,
     selectedStatus,
+    selectedDateColumn,
+    selectedDate,
     sortKey,
     sortDirection,
   ])
@@ -157,6 +172,7 @@ export default function Dashboard() {
     setSelectedChannel('')
     setSelectedMonth('')
     setSelectedStatus('')
+    setSelectedDate('')
   }
 
   const appliedFilters = []
@@ -165,6 +181,16 @@ export default function Dashboard() {
   if (selectedMonth) appliedFilters.push(`Month: ${selectedMonth}`)
   if (selectedStatus)
     appliedFilters.push(`Status: ${selectedStatus.replaceAll('_', ' ')}`)
+  if (selectedDate) {
+    const colLabel =
+      {
+        create_time: 'Created Date',
+        pay_time: 'Payment Date',
+        ship_by_date: 'Ship By Date',
+        synced_at: 'Synced Date',
+      }[selectedDateColumn] || selectedDateColumn
+    appliedFilters.push(`${colLabel}: ${selectedDate}`)
+  }
 
   return (
     <main className='min-h-screen bg-background'>
@@ -282,6 +308,10 @@ export default function Dashboard() {
             onClearSearch={() => setSearchQuery('')}
             onClearAll={handleClearAllFilters}
             hasActiveFilters={appliedFilters.length > 0}
+            selectedDateColumn={selectedDateColumn}
+            onDateColumnChange={setSelectedDateColumn}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
           />
         </div>
 

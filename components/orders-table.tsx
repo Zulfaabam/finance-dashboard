@@ -215,7 +215,7 @@ export function OrdersTable({
                   </td>
                   <td className='px-6 py-4'>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyles(order.order_status)}`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyles(order.order_status)}`}
                     >
                       {order.order_status.replaceAll('_', ' ')}
                     </span>

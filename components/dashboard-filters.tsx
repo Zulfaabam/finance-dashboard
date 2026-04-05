@@ -17,7 +17,18 @@ interface DashboardFiltersProps {
   onClearSearch: () => void
   onClearAll: () => void
   hasActiveFilters: boolean
+  selectedDateColumn: string
+  onDateColumnChange: (column: string) => void
+  selectedDate: string
+  onDateChange: (date: string) => void
 }
+
+const DATE_COLUMNS = [
+  { label: 'Created Date', value: 'create_time' },
+  { label: 'Payment Date', value: 'pay_time' },
+  { label: 'Ship By Date', value: 'ship_by_date' },
+  { label: 'Synced Date', value: 'synced_at' },
+]
 
 export function DashboardFilters({
   channels,
@@ -34,6 +45,10 @@ export function DashboardFilters({
   onClearSearch,
   onClearAll,
   hasActiveFilters,
+  selectedDateColumn,
+  onDateColumnChange,
+  selectedDate,
+  onDateChange,
 }: DashboardFiltersProps) {
   return (
     <div className='space-y-4'>
@@ -57,8 +72,8 @@ export function DashboardFilters({
         )}
       </div>
 
-      {/* Second Row: Dropdowns */}
-      <div className='flex flex-col md:flex-row gap-3 items-stretch md:items-center'>
+      {/* Second Row: Dropdowns & Date */}
+      <div className='flex flex-col md:flex-row flex-wrap gap-3 items-stretch md:items-center'>
         <select
           value={selectedChannel}
           onChange={(e) => onChannelChange(e.target.value)}
@@ -97,6 +112,26 @@ export function DashboardFilters({
             </option>
           ))}
         </select>
+
+        <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto'>
+          <select
+            value={selectedDateColumn}
+            onChange={(e) => onDateColumnChange(e.target.value)}
+            className='px-4 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all hover:border-primary/50'
+          >
+            {DATE_COLUMNS.map((col) => (
+              <option key={col.value} value={col.value}>
+                {col.label}
+              </option>
+            ))}
+          </select>
+          <input
+            type='date'
+            value={selectedDate}
+            onChange={(e) => onDateChange(e.target.value)}
+            className='px-4 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all hover:border-primary/50'
+          />
+        </div>
 
         {hasActiveFilters && (
           <button
